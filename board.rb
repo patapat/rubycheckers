@@ -1,5 +1,6 @@
 require 'byebug'
 require 'colorize'
+require 'io/console'
 
 module Checkers
 
@@ -28,15 +29,15 @@ module Checkers
         @grid.count.times do |col|
           next if (row.even? && col.even?) || (row.odd? && col.odd?)
           if row.between?(0,2)
-            @grid[row][col] = Piece.new([row, col], :B, self)
+            @grid[row][col] = Checkers::Piece.new([row, col], :B, self)
           elsif row.between?(5,7)
-            @grid[row][col] = Piece.new([row, col], :R, self)
+            @grid[row][col] = Checkers::Piece.new([row, col], :R, self)
           end
         end
       end
 
     end
-    
+
 
     def won?(color)
       opp_color = (color == :B ? :R : :B)
@@ -44,30 +45,32 @@ module Checkers
       false
     end
 
-    def render
+    def render_cursor(coords)
       system('clear')
-      headers = %w{0 1 2 3 4 5 6 7}
-      print '   ' + headers.join(' ')
-      puts
+
       8.times do |row|
-        print row.to_s + '  '
         8.times do |col|
-          if (row.odd? && col.odd?) || (row.even? && col.even?)
-            if @grid[row][col].nil?
-              print '  '.colorize(:background => :red)
-            else
-              print (@grid[row][col].icon + ' ').colorize(:background => :red)
-            end
+          if row == coords[0] && col == coords[1]
+            print "  ".colorize( :background => :yellow )
           else
-            if @grid[row][col].nil?
-              print '  '.colorize(:background => :black)
+            if (row.odd? && col.odd?) || (row.even? && col.even?)
+              if @grid[row][col].nil?
+                print '  '.colorize(:background => :red)
+              else
+                print (@grid[row][col].icon + ' ').colorize(:background => :red)
+              end
             else
-              print (@grid[row][col].icon + ' ').colorize(:background => :black)
+              if @grid[row][col].nil?
+                print '  '.colorize(:background => :black)
+              else
+                print (@grid[row][col].icon + ' ').colorize(:background => :black)
+              end
             end
           end
         end
         puts
       end
+      print coords
     end
 
     def valid_pos?(pos)

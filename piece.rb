@@ -35,36 +35,38 @@ module Checkers
       return false unless (self.moves.include?(dest)) && ((dest[0] - position[0]).abs != 1)
       enemy_pos = [(position[0] + dest[0]) / 2, (position[1] + dest[1]) / 2]
       board[enemy_pos] = nil
-      board[position] = nil
-      self.position = dest
-      board[dest] = self
-      maybe_promote
+      make_move(dest)
 
       true
     end
 
     def perform_slide(dest)
       return false unless self.moves.include?(dest) && (dest[0] - position[0]).abs == 1
-      board[position] = nil
-      self.position = dest
-      board[dest] = self
-      maybe_promote
+      make_move(dest)
 
       true
     end
 
-    def perform_moves(moves)
-      valid_move_seq?(moves) ? perform_moves!(moves) : InvalidMoveError
+    def make_move(dest)
+      board[position] = nil
+      self.position = dest
+      board[dest] = self
+      maybe_promote
     end
 
-    def perform_moves!(moves)
-      moves.each do |move|
-        if moves.count == 1
-          return false unless perform_slide(move) || perform_jump(move)
-        else
-          return false unless perform_jump(move)
-        end
-      end
+    def perform_moves(moves)
+      valid_move_seq?(moves) ? perform_moves!(moves) : false
+    end
+
+    def perform_moves!(move)
+      return false unless perform_slide(move) || perform_jump(move)
+      # moves.each do |move|
+      #   if moves.count == 1
+      #     return false unless perform_slide(move) || perform_jump(move)
+      #   else
+      #     return false unless perform_jump(move)
+      #   end
+      # end
 
       true
     end
@@ -113,7 +115,7 @@ module Checkers
     end
 
     def jump_move?(pos)
-      pos[0].abs == 2
+      (position[0] - pos[0]).abs == 2
     end
 
     def empty_space?(pos)
@@ -136,9 +138,3 @@ module Checkers
 
   end
 end
-
-b = Checkers::Board.new
-b.fill_start_board
-red_pawn = b[[5,4]]
-red_pawn.perform_slide([4,3])
-red_pawn.moves
